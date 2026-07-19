@@ -3,7 +3,24 @@ import socket
 from flask import Flask, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
 
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+
+resource = Resource.create({"service.name": "mohamed-mar-app"})
+provider = TracerProvider(resource=resource)
+otlp_exporter = OTLPSpanExporter(
+    endpoint="otel-collector.mohamed-mar.svc.cluster.local:4317",
+    insecure=True
+)
+provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+trace.set_tracer_provider(provider)
+
 app = Flask(__name__)
+FlaskInstrumentor().instrument_app(app)
 metrics = PrometheusMetrics(app)  # expose /metrics automatiquement
 
 STUDENT = "Mohamed-MAR"
