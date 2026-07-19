@@ -3,7 +3,7 @@ replicaCount: 2
 student: "Mohamed-MAR"
 
 image:
-  repository: ghcr.io/SCOMRR/mohamed-mar-app
+  repository: ghcr.io/scomrr/mohamed-mar-app
   tag: "47c5509"
   pullPolicy: IfNotPresent
 
