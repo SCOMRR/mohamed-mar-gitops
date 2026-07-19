@@ -4,7 +4,7 @@ student: "Mohamed-MAR"
 
 image:
   repository: ghcr.io/SCOMRR/mohamed-mar-app
-  tag: "latest"
+  tag: "47c5509"
   pullPolicy: IfNotPresent
 
 service:
