@@ -4,7 +4,7 @@ student: "Mohamed-MAR"
 
 image:
   repository: ghcr.io/scomrr/mohamed-mar-app
-  tag: "version-inexistante-test-rollback"
+  tag: "ddeef95"
   pullPolicy: IfNotPresent
 
 service:
