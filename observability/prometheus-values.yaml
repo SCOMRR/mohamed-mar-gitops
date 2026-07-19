@@ -1,10 +1,17 @@
 # À utiliser avec : helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus-values.yaml -n monitoring --create-namespace
+
 grafana:
   adminPassword: "MohamedMar2026!"
   defaultDashboardsEnabled: true
   service:
     type: NodePort
     nodePort: 32000
+  nodeSelector:
+    role: monitoring
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 prometheus:
   prometheusSpec:
@@ -12,8 +19,29 @@ prometheus:
     retention: 7d
     resources:
       requests:
-        cpu: 200m
-        memory: 512Mi
+        cpu: 150m
+        memory: 384Mi
+    nodeSelector:
+      role: monitoring
 
 alertmanager:
   enabled: true
+  alertmanagerSpec:
+    nodeSelector:
+      role: monitoring
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+prometheusOperator:
+  nodeSelector:
+    role: monitoring
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+kube-state-metrics:
+  nodeSelector:
+    role: monitoring
