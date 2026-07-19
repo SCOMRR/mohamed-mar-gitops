@@ -1,0 +1,8 @@
+apiVersion: v2
+name: mohamed-mar-app
+description: Chart Helm de l'application GitOps de Mohamed MAR
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Mohamed MAR

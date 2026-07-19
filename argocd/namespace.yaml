@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mohamed-mar
+  labels:
+    student: mohamed-mar
+    managed-by: argocd

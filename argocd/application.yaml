@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mohamed-mar-release
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/SCOMRR/mohamed-mar-gitops.git
+    targetRevision: main
+    path: helm/mohamed-mar-app
+    helm:
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mohamed-mar
+
+  syncPolicy:
+    automated:
+      prune: true      # supprime les ressources retirées du Git
+      selfHeal: true    # corrige toute dérive manuelle du cluster
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

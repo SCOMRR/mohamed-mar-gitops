@@ -1,0 +1,58 @@
+{
+  "title": "Mohamed-MAR - GitOps App Dashboard",
+  "uid": "mohamed-mar-dashboard",
+  "tags": ["mohamed-mar", "gitops"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Pods Up - mohamed-mar-release",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(kube_pod_status_ready{namespace=\"mohamed-mar\", condition=\"true\"})",
+          "legendFormat": "Pods prêts"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Requêtes HTTP / seconde - app Mohamed-MAR",
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(flask_http_request_total{app=\"mohamed-mar-release\"}[1m])) by (status)",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Latence moyenne des requêtes (s)",
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "expr": "rate(flask_http_request_duration_seconds_sum{app=\"mohamed-mar-release\"}[5m]) / rate(flask_http_request_duration_seconds_count{app=\"mohamed-mar-release\"}[5m])",
+          "legendFormat": "latence moyenne"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Utilisation CPU / mémoire des pods",
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 22 },
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"mohamed-mar\"}[5m])) by (pod)",
+          "legendFormat": "CPU {{pod}}"
+        },
+        {
+          "expr": "sum(container_memory_usage_bytes{namespace=\"mohamed-mar\"}) by (pod)",
+          "legendFormat": "RAM {{pod}}"
+        }
+      ]
+    }
+  ]
+}

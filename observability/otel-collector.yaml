@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: mohamed-mar
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch: {}
+      resource:
+        attributes:
+          - key: student
+            value: "mohamed-mar"
+            action: upsert
+
+    exporters:
+      logging:
+        loglevel: info
+      # Remplacer par l'exporter Tempo/Jaeger si installé, ex :
+      # otlp:
+      #   endpoint: tempo.monitoring.svc.cluster.local:4317
+      #   tls:
+      #     insecure: true
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [resource, batch]
+          exporters: [logging]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: mohamed-mar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.105.0
+          args: ["--config=/etc/otel/otel-collector-config.yaml"]
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otel
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: mohamed-mar
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: grpc
+      port: 4317
+      targetPort: 4317
+    - name: http
+      port: 4318
+      targetPort: 4318

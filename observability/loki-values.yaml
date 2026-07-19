@@ -1,0 +1,18 @@
+# À utiliser avec : helm install loki grafana/loki-stack -f loki-values.yaml -n monitoring
+loki:
+  persistence:
+    enabled: true
+    size: 5Gi
+  auth_enabled: false
+
+promtail:
+  enabled: true
+  config:
+    snippets:
+      extraRelabelConfigs:
+        - source_labels: [__meta_kubernetes_namespace]
+          regex: mohamed-mar
+          action: keep
+
+grafana:
+  enabled: false   # on utilise déjà Grafana installé via kube-prometheus-stack

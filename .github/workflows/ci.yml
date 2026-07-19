@@ -1,0 +1,109 @@
+name: CI - Mohamed-MAR GitOps App
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "app/**"
+      - "helm/**"
+      - ".github/workflows/**"
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/mohamed-mar-app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: app
+        run: pip install -r requirements.txt
+
+      - name: Run basic smoke test
+        working-directory: app
+        run: |
+          python -c "import app; client = app.app.test_client(); \
+          r = client.get('/healthz'); \
+          assert r.status_code == 200; \
+          print('Health check OK')"
+
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint helm/mohamed-mar-app
+
+  build-and-push:
+    needs: [test, helm-lint]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.short_sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set short SHA
+        id: meta
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.short_sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Scan image with Trivy (vulnérabilités)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.short_sha }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 0   # passer à 1 pour bloquer le pipeline en cas de faille critique
+
+  update-manifest:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update image tag in values.yaml (déclenche Argo CD)
+        run: |
+          sed -i "s/tag: .*/tag: \"${{ needs.build-and-push.outputs.image_tag }}\"/" helm/mohamed-mar-app/values.yaml
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add helm/mohamed-mar-app/values.yaml
+          git commit -m "ci: bump image tag to ${{ needs.build-and-push.outputs.image_tag }}" || echo "Rien à commit"
+          git push

@@ -1,0 +1,33 @@
+replicaCount: 2
+
+student: "Mohamed-MAR"
+
+image:
+  repository: ghcr.io/SCOMRR/mohamed-mar-app
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5000
+
+ingress:
+  enabled: false
+  className: nginx
+  host: mohamed-mar.local
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
+
+namespace: mohamed-mar
+releaseName: mohamed-mar-release
