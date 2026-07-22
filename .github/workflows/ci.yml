@@ -11,8 +11,8 @@ on:
     branches: [ "main" ]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: scomrr/mohamed-mar-app
+  REGISTRY: registry.gitlab.com
+  IMAGE_NAME: esmt-group4/mohamed-mar-app
 
 jobs:
   test:
@@ -66,12 +66,12 @@ jobs:
         id: meta
         run: echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Log in to GHCR
+      - name: Log in to GitLab Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GITLAB_USER }}
+          password: ${{ secrets.GITLAB_TOKEN }}
 
       - name: Build and push image
         uses: docker/build-push-action@v5
