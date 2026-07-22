@@ -1,23 +1,20 @@
 replicaCount: 2
-
 student: "Mohamed-MAR"
-
 image:
-  repository: ghcr.io/scomrr/mohamed-mar-app
+  repository: registry.gitlab.com/esmt-group4/mohamed-mar-app
   tag: "89ef7f8"
   pullPolicy: IfNotPresent
-
+imagePullSecrets:
+  - name: gitlab-registry-secret
 service:
   type: NodePort
   port: 80
   targetPort: 5000
   nodePort: 30080
-
 ingress:
   enabled: false
   className: nginx
   host: mohamed-mar.local
-
 resources:
   requests:
     cpu: 50m
@@ -25,10 +22,8 @@ resources:
   limits:
     cpu: 200m
     memory: 128Mi
-
 serviceMonitor:
   enabled: true
   interval: 15s
-
 namespace: mohamed-mar
 releaseName: mohamed-mar-release
