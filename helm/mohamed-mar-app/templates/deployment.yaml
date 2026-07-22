@@ -15,7 +15,7 @@ spec:
       labels:
         app: {{ .Values.releaseName }}
         student: {{ .Values.student | quote }}
-   spec:
+    spec:
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
