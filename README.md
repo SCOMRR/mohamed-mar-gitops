@@ -5,7 +5,7 @@
 
 Dépôt Git source de vérité pour le déploiement automatisé, sécurisé et observable de l'application `mohamed-mar-app` sur un cluster Kubernetes à 3 nœuds.
 
-**Stack réelle :** kubeadm (VMware, 4 VMs Ubuntu Server 22.04) → GitHub Actions (CI + GHCR + Trivy) → Argo CD (GitOps) → Prometheus/Grafana + Loki/Promtail + OpenTelemetry (observabilité, sur VM dédiée)
+**Stack réelle :** kubeadm (VMware, 4 VMs Ubuntu Server 22.04) → GitHub Actions (CI + GitLab Container Registry + Trivy) → Argo CD (GitOps) → Prometheus/Grafana + Loki/Promtail + OpenTelemetry (observabilité, sur VM dédiée)
 
 ---
 
@@ -108,6 +108,8 @@ git commit -m "Initial commit - plateforme GitOps Mohamed-MAR"
 git branch -M main
 git push -u origin main
 \`\`\`
+ Registre d'images (GitLab Container Registry)
+Les images sont construites par la CI et publiées sur registry.gitlab.com/esmt-group4/mohamed-mar-app, étiquetées par le hash court du commit. Chaque image est analysée par Trivy (scan de vulnérabilités) dans le job build-and-push. Le registre étant privé, un secret gitlab-registry-secret permet au cluster de tirer l'image.
 
 ## 6. Déployer l'Application Argo CD
 
