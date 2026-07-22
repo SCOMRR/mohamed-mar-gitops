@@ -15,7 +15,11 @@ spec:
       labels:
         app: {{ .Values.releaseName }}
         student: {{ .Values.student | quote }}
-    spec:
+   spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
