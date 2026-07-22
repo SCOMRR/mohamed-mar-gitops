@@ -2,7 +2,7 @@ replicaCount: 2
 student: "Mohamed-MAR"
 image:
   repository: registry.gitlab.com/esmt-group4/mohamed-mar-app
-  tag: "89ef7f8"
+  tag: "70ec2a5"
   pullPolicy: IfNotPresent
 imagePullSecrets:
   - name: gitlab-registry-secret
